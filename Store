@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Origen Noble - Pedidos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <h1>Origen Noble</h1>
+  <p>Listo para cocinar, listo para disfrutar</p>
+</header>
+
+<nav>
+  <a href="#catalogo">Catálogo</a>
+  <a href="#bakego">Bake & Go</a>
+  <a href="#personalizar">Personalizar</a>
+  <a href="#como-comprar">Cómo comprar</a>
+  <a href="#contacto">Contacto</a>
+</nav>
+
+<section id="catalogo">
+  <h2>Catálogo</h2>
+  <div class="productos" id="productos"></div>
+</section>
+
+<section id="bakego">
+  <h2>Bake & Go</h2>
+  <p>Mezclas listas para cocinar con ingredientes nobles, naturales y de alta calidad.</p>
+  <div class="productos" id="bakegoProductos"></div>
+</section>
+
+<section id="personalizar">
+  <h2>Preparaciones personalizadas</h2>
+  <label>Elegí una base:</label>
+  <input type="text" id="basePersonalizada" placeholder="Ej: budín, pan, cookies">
+  <label>Agregá ingredientes:</label>
+  <textarea id="extrasPersonalizados" placeholder="Ej: chips, nueces, semillas..."></textarea>
+  <button onclick="agregarPersonalizado()">Agregar al carrito</button>
+</section>
+
+<section id="carrito">
+  <h2>Carrito</h2>
+  <ul id="listaCarrito"></ul>
+  <p id="total"></p>
+  <button onclick="finalizarPedido()">Finalizar pedido por WhatsApp</button>
+</section>
+
+<section id="como-comprar">
+  <h2>Cómo comprar</h2>
+  <ol>
+    <li>Elegís tus productos.</li>
+    <li>Armás tu carrito.</li>
+    <li>Finalizás tu pedido.</li>
+    <li>Te contactamos por WhatsApp para coordinar pago y entrega.</li>
+  </ol>
+</section>
+
+<section id="contacto">
+  <h2>Contacto</h2>
+  <p>📱 WhatsApp: +54 9 000 000 0000</p>
+  <p>📧 Email: pedidos@origennoble.com</p>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f9f9f9;
+}
+
+header {
+  background: #2f5d50;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+nav {
+  background: #e8f1ef;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #2f5d50;
+  font-weight: bold;
+}
+
+section {
+  padding: 20px;
+}
+
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.producto {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+.producto h3 {
+  margin-top: 0;
+}
+
+.producto button {
+  margin-top: 5px;
+  padding: 8px;
+  border: none;
+  background: #2f5d50;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#carrito ul {
+  list-style: none;
+  padding: 0;
+}
+
+#carrito li {
+  margin-bottom: 8px;
+}
+const productos = [
+  { nombre: "Mix Origen Noble", kg: 5500, medio: 2750, categoria: "catalogo" },
+  { nombre: "Granola Origen Noble", kg: 5200, medio: 2600, categoria: "catalogo" },
+  { nombre: "Almendras", kg: 8200, medio: 4100, categoria: "catalogo" },
+  { nombre: "Arándanos deshidratados", kg: 9800, medio: 4900, categoria: "catalogo" },
+  { nombre: "Budín Banana & Nuez", kg: 6900, medio: 3450, categoria: "bakego" },
+  { nombre: "Pan Integral Multisemillas", kg: 6500, medio: 3250, categoria: "bakego" }
+];
+
+let carrito = [];
+
+function mostrarProductos() {
+  const contenedorCatalogo = document.getElementById("productos");
+  const contenedorBakego = document.getElementById("bakegoProductos");
+
+  productos.forEach(prod => {
+    const div = document.createElement("div");
+    div.className = "producto";
+    div.innerHTML = `
+      <h3>${prod.nombre}</h3>
+      <p>1 kg: $${prod.kg}</p>
+      <p>½ kg: $${prod.medio}</p>
+      <button onclick="agregar('${prod.nombre}', 'kg')">Agregar 1 kg</button>
+      <button onclick="agregar('${prod.nombre}', 'medio')">Agregar ½ kg</button>
+    `;
+    if (prod.categoria === "catalogo") contenedorCatalogo.appendChild(div);
+    else contenedorBakego.appendChild(div);
+  });
+}
+
+function agregar(nombre, tamaño) {
+  const prod = productos.find(p => p.nombre === nombre);
+  const precio = tamaño === "kg" ? prod.kg : prod.medio;
+  carrito.push({ nombre, tamaño, precio });
+  actualizarCarrito();
+}
+
+function agregarPersonalizado() {
+  const base = document.getElementById("basePersonalizada").value;
+  const extras = document.getElementById("extrasPersonalizados").value;
+  if (!base) return alert("Completá la base de la preparación.");
+
+  carrito.push({
+    nombre: `Preparación personalizada: ${base}`,
+    tamaño: "a definir",
+    precio: 0,
+    extras
+  });
+
+  document.getElementById("basePersonalizada").value = "";
+  document.getElementById("extrasPersonalizados").value = "";
+  actualizarCarrito();
+}
+
+function actualizarCarrito() {
+  const lista = document.getElementById("listaCarrito");
+  lista.innerHTML = "";
+  let total = 0;
+
+  carrito.forEach((item, index) => {
+    total += item.precio;
+    const li = document.createElement("li");
+    li.innerHTML = `${item.nombre} (${item.tamaño}) - $${item.precio}`;
+    lista.appendChild(li);
+  });
+
+  document.getElementById("total").innerText = "Total estimado: $" + total;
+}
+
+function finalizarPedido() {
+  if (carrito.length === 0) {
+    alert("El carrito está vacío.");
+    return;
+  }
+
+  let mensaje = "Hola! Quiero realizar este pedido:%0A";
+  carrito.forEach(item => {
+    mensaje += `- ${item.nombre} (${item.tamaño})%0A`;
+    if (item.extras) mensaje += `  Extras: ${item.extras}%0A`;
+  });
+
+  window.open(`https://wa.me/5490000000000?text=${mensaje}`);
+}
+
+mostrarProductos();
