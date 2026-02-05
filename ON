@@ -1,0 +1,67 @@
+import React, { useState } from "react";
+
+export default function OrigenNobleWeb() {
+  const products = [
+    { id: 1, name: "Mix Origen Noble", priceKg: 5500, priceHalf: 2750 },
+    { id: 2, name: "Granola Origen Noble", priceKg: 5200, priceHalf: 2600 },
+    { id: 3, name: "Almendras", priceKg: 8200, priceHalf: 4100 },
+    { id: 4, name: "Arándanos deshidratados", priceKg: 9800, priceHalf: 4900 }
+  ];
+
+  const [cart, setCart] = useState([]);
+
+  const addToCart = (product, size) => {
+    setCart([...cart, { ...product, size }]);
+  };
+
+  const total = cart.reduce((sum, item) => sum + (item.size === "kg" ? item.priceKg : item.priceHalf), 0);
+
+  const handleCheckout = () => {
+    const message = cart
+      .map(item => `${item.name} (${item.size === "kg" ? "1 kg" : "500 g"})`)
+      .join("%0A");
+
+    window.open(`https://wa.me/5490000000000?text=Hola! Quiero realizar este pedido:%0A${message}%0ATotal estimado: $${total}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-neutral-50 p-6 font-sans">
+      <h1 className="text-3xl font-bold mb-2">Origen Noble</h1>
+      <p className="text-neutral-600 mb-6">Pedidos online · Pago y coordinación por WhatsApp</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map(product => (
+          <div key={product.id} className="bg-white rounded-2xl shadow p-4">
+            <h2 className="font-semibold text-lg mb-2">{product.name}</h2>
+            <p className="text-sm mb-1">1 kg: ${product.priceKg}</p>
+            <p className="text-sm mb-3">500 g: ${product.priceHalf}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => addToCart(product, "kg")}
+                className="bg-emerald-600 text-white px-3 py-1 rounded"
+              >
+                Agregar 1 kg
+              </button>
+              <button
+                onClick={() => addToCart(product, "half")}
+                className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded"
+              >
+                Agregar 500 g
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white shadow p-4 flex justify-between items-center">
+        <span className="font-semibold">Carrito: {cart.length} productos · Total: ${total}</span>
+        <button
+          onClick={handleCheckout}
+          className="bg-emerald-700 text-white px-4 py-2 rounded"
+        >
+          Finalizar pedido por WhatsApp
+        </button>
+      </div>
+    </div>
+  );
+}
